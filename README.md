@@ -3,11 +3,8 @@
 DedupeAI is an enterprise-grade operational prototype engineered to eliminate system alert fatigue for IT Production Support teams. The application implements a high-performance 4-stage pipeline that automatically ingest support incidents, executes a localized vector similarity search against historical ticket records, and runs a structured AI verification gate to detect, link, and flag duplicate tickets.
 
 ## 👥 Team Information
-* **Team Name:** [Insert Team Name]
-* **Team Members:** * Student 1: Backend Developer & Data Engineering [Ref: Guidelines Role Distribution]
-  * Student 2: UI & Integration Specialist [Ref: Guidelines Role Distribution]
-  * Student 3: Prompt Engineer & AI Specialist [Ref: Guidelines Role Distribution]
-  * Student 4: Quality Assurance & Technical Writer [Ref: Guidelines Role Distribution]
+* **Name:** [S.Vijay Bhaskar Reddy]
+
 
 ## 🛠️ Tools & Technologies Used
 * **Operating System Platform:** Ubuntu 26.04 LTS (Fully Tested & Validated)
