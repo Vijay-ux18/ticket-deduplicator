@@ -1,0 +1,16 @@
+ticket_id,category,title,description,created_at
+TS-01,Database,Postgres Connection Pool Exhausted,Fatal error: Remaining connection slots are reserved for non-replication superuser connections. High API latency observed.,2026-06-10 08:00:00
+TS-02,Authentication,JWT Token Signature Verification Failure,User login dropping with error 'InvalidSignatureError' across all microservices post key-rotation deployment.,2026-06-11 09:15:00
+TS-03,Infrastructure,Disk Space Low on K8s Node worker-03,Alert: Root filesystem volume /dev/sda1 utilization has exceeded 92% capacity threshold on production cluster.,2026-06-11 14:22:00
+TS-04,Data Pipeline,Kafka Consumer Group Rebalance Loop,Kafka consumer group 'order-processor-group' constantly rebalancing causing severe ingestion lag spikes.,2026-06-12 10:05:00
+TS-05,Database,Redis Cache Out of Memory,OOM Command not allowed when used memory > 'maxmemory' configuration setting on production session store.,2026-06-12 11:40:00
+TS-06,Network,DNS Resolution Timeout in VPC Internal,Internal microservices experiencing Intermittent 504 Gateway Timeouts due to CoreDNS resolution degradation.,2026-06-13 04:12:00
+TS-07,Authentication,MFA SMS Gateway API Timeout,Multi-factor authentication codes failing to deliver to mobile networks. Gateway API returning 504 timeout codes.,2026-06-13 17:30:00
+TS-08,Infrastructure,Memory Leak in Payment Processing Service,Pod heap allocations steadily climbing without garbage collection cycles. OOMKilled event triggered.,2026-06-14 01:10:00
+TS-09,Data Pipeline,Airflow Dag Run Timeout Error,Daily financial settlement ETL job killed programmatically after violating max_active_runs execution timeout limit.,2026-06-14 06:00:00
+TS-10,Database,Stale Database Read Replicas Lag,Asynchronous replication lag between primary master write cluster and read node replicas has exceeded 300 seconds.,2026-06-14 23:45:00
+TS-11,Network,SSL Certificate Expiry Warning,Production wildcard certificate for domain api.company.com expires within 48 hours. Renewal Cron job failing.,2026-06-15 02:20:00
+TS-12,Application,NullPointerException in Shopping Cart Checkout,Uncaught fatal exception on product inventory check function when cart array contains null references.,2026-06-15 08:14:00
+TS-13,Infrastructure,Kubernetes Ingress Controller Nginx Crash,Ingress nginx controller pods entering CrashLoopBackOff state due to malformed upstream routing configurations.,2026-06-15 12:00:00
+TS-14,Database,Deadlock Detected in Order Transaction Table,Process transaction ID 40582 blocked on lock share tables by concurrent update rows execution.,2026-06-15 15:10:00
+TS-15,Data Pipeline,S3 Object Storage Upload Permissions Denied,AWS AccessDenied exception raised on archival backup bucket sync. IAM permissions mismatch on batch storage roles.,2026-06-15 18:05:00
