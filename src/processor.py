@@ -15,10 +15,11 @@ class TicketProcessor:
         self._initialize_sqlite_db()
 
     def _initialize_sqlite_db(self):
+        """Creates historical tables alongside the Security Auditing layout tables."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
-        # Original incidents table
+        # Original incidents entity table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS historical_tickets (
                 ticket_id TEXT PRIMARY KEY,
@@ -29,7 +30,16 @@ class TicketProcessor:
             )
         """)
         
-        # Upgraded Feature: Security Audit Log Table [backend_Securities: Audit Trails]
+        # Identity management user credentials tracking table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS portal_users (
+                username TEXT PRIMARY KEY,
+                password_hash TEXT,
+                account_created TEXT
+            )
+        """)
+        
+        # Non-Repudiation Security Audit stream table [backend_Securities: Audit Trails]
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS security_audit_logs (
                 event_id TEXT PRIMARY KEY,
@@ -40,10 +50,29 @@ class TicketProcessor:
             )
         """)
         conn.commit()
-        
-        # Seed records if empty
+        conn.close()
+
+    def seed_historical_baseline(self):
+        """
+        Seeds standard company evaluation baseline entries.
+        Fixes the AttributeError in app.py by providing the required initialization signature.
+        """
+        # If the fallback baseline csv doesn't exist on disk, mock it out immediately
+        if not os.path.exists(self.csv_path):
+            os.makedirs(os.path.dirname(self.csv_path), exist_ok=True)
+            mock_records = {
+                "ticket_id": ["TS-01", "TS-02", "TS-03"],
+                "category": ["Database", "Authentication", "Infrastructure"],
+                "title": ["Postgres Connection Pool Exhausted", "JWT Token Decryption Error", "Disk Utilization Maxed Out"],
+                "description": ["Fatal connections maxed out for superusers across application services.", "InvalidSignatureError verified across routing microservices post key-rotation.", "Root directory filesystem size has exceeded the warning capacity threshold of 92%."],
+                "created_at": ["2026-06-10 08:00:00", "2026-06-11 09:00:00", "2026-06-12 10:00:00"]
+            }
+            pd.DataFrame(mock_records).to_csv(self.csv_path, index=False)
+
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM historical_tickets")
-        if cursor.fetchone()[0] == 0 and os.path.exists(self.csv_path):
+        if cursor.fetchone()[0] == 0:
             df = pd.read_csv(self.csv_path)
             df.to_sql("historical_tickets", conn, if_exists="append", index=False)
             conn.commit()
@@ -52,60 +81,61 @@ class TicketProcessor:
     def sanitize_and_mask_input(self, text_payload):
         """
         [backend_Securities: Input Validation & Sensitive Data Masking]
-        Strips HTML injection vectors and redacts passwords/API keys from logs.
+        Strips dangerous HTML tags and redacts secret values from tracking systems.
         """
         if not text_payload:
             return ""
         
-        # XSS Prevention 
+        # XSS Prevention via escaping
         sanitized = html.escape(text_payload)
         
-        # Data Masking: Never log passwords, tokens, or keys 
+        # Sensitive Data Masking: Redact credentials, tokens, and keys
         sanitized = re.sub(r'(?i)(password|passwd|pwd)\s*[:=]\s*[^\s,\'"]+', r'\1=********', sanitized)
         sanitized = re.sub(r'(?i)(token|bearer|api_key|secret)\s*[:=]\s*[^\s,\'"]+', r'\1=********', sanitized)
         sanitized = re.sub(r'AIzaSy[A-Za-z0-9_-]{35}', 'AIzaSy=********', sanitized)
         
         return sanitized
 
-    def log_security_event(self, action, status, meta):
-        """Records an immutable security audit event."""
+    def log_security_event(self, action, status, meta_dict):
+        """Records an immutable security audit trail transaction [backend_Securities: Audit Trails]."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        event_id = f"AUDIT-{int(datetime.now().timestamp())}"
+        event_id = f"AUDIT-{int(datetime.now().timestamp())}-{os.urandom(2).hex()}"
         cursor.execute(
             "INSERT INTO security_audit_logs VALUES (?, ?, ?, ?, ?)",
-            (event_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), action, status, str(meta))
+            (event_id, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), action, status, str(meta_dict))
         )
         conn.commit()
         conn.close()
 
     def fetch_audit_logs(self):
-        """Exposes audit data for your dashboard visibility grid."""
+        """Exposes relational audit data to your cockpit viewing matrix."""
         conn = sqlite3.connect(self.db_path)
         df = pd.read_sql_query("SELECT * FROM security_audit_logs ORDER BY timestamp DESC LIMIT 5", conn)
         conn.close()
         return df
 
-    def fetch_all_historical_tickets(self):
+    def find_top_matches(self, cleaned_text, top_n=3):
+        """Runs cosine vector calculation models against your active SQLite rows."""
         conn = sqlite3.connect(self.db_path)
         df = pd.read_sql_query("SELECT * FROM historical_tickets", conn)
         conn.close()
-        return df
 
-    def find_top_matches(self, new_ticket_text, top_n=3):
-        df = self.fetch_all_historical_tickets()
-        if df.empty or not new_ticket_text.strip():
+        if df.empty or not cleaned_text.strip():
             return []
-        historical_corpus = (df['title'] + " " + df['description']).tolist()
+
+        corpus = (df['title'] + " " + df['description']).tolist()
         vectorizer = TfidfVectorizer(stop_words='english')
-        tfidf_matrix = vectorizer.fit_transform(historical_corpus)
-        new_vector = vectorizer.transform([new_ticket_text])
-        similarity_scores = cosine_similarity(new_vector, tfidf_matrix).flatten()
-        df['similarity_score'] = similarity_scores
-        top_df = df.sort_values(by='similarity_score', ascending=False).head(top_n)
+        matrix = vectorizer.fit_transform(corpus)
+        
+        input_vector = vectorizer.transform([cleaned_text])
+        scores = cosine_similarity(input_vector, matrix).flatten()
+        
+        df['similarity_score'] = scores
+        match_rows = df.sort_values(by='similarity_score', ascending=False).head(top_n)
         
         results = []
-        for _, row in top_df.iterrows():
+        for _, row in match_rows.iterrows():
             results.append({
                 "ticket_id": row['ticket_id'],
                 "category": row['category'],
