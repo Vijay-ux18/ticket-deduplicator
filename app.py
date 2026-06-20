@@ -98,7 +98,6 @@ if st.session_state.authenticated_user is None:
                 try:
                     conn = sqlite3.connect(proc.db_path)
                     cursor = conn.cursor()
-                    # Apply encryption at rest directly via hashing [backend_Securities: Password Hashing]
                     encrypted_pass = hash_password(reg_password)
                     cursor.execute(
                         "INSERT INTO portal_users VALUES (?, ?, ?)",
@@ -116,7 +115,6 @@ if st.session_state.authenticated_user is None:
 # SCREEN GATE 2: AUTHENTICATED USER — ACCESS GRANTED TO SERVICE WORKSPACE
 # ==================================================================================================
 else:
-    # Navigation header displaying the logged-in user profile [backend_Securities: Identity & Access]
     st.sidebar.markdown(f"👤 **Authenticated Operator:** `{st.session_state.authenticated_user}`")
     if st.sidebar.button("Secure Logout and Purge Session"):
         proc.log_security_event("USER_LOGOUT", "SUCCESS", {"user": st.session_state.authenticated_user})
@@ -126,14 +124,12 @@ else:
     st.title("🛡️ DedupeAI — Secure Fullstack Enterprise Dashboard")
     st.markdown("---")
 
-    # Split view layout logic
     col_left, col_right = st.columns([2, 3])
 
     with col_left:
         st.subheader("📥 Secure Data Intake Channel")
         st.markdown("---")
         
-        # Fast macro injection scenario presets [backend_Securities: Input Validation]
         st.markdown("**Incident Inject Simulation Presets:**")
         b1, b2, b3 = st.columns(3)
         preset_text = ""
@@ -161,33 +157,23 @@ else:
         st.markdown("---")
         
         if fire_triage and input_text.strip():
-            # Defensive Control Wrapper: Hide internal framework failures [backend_Securities: Hide Internal Errors]
             try:
-                # 1. Enforce validation filtering and sensitive data redacting [backend_Securities: Masking & Sanitization]
                 cleaned_input = proc.sanitize_and_mask_input(input_text)
-                
                 st.info(f"🔒 **Sanitized Ingestion Stream Preview:**\n`{cleaned_input}`")
                 
-                # Formulate unique key execution block for cache tier mapping
                 cache_key = f"verdict:{hash(cleaned_input)}"
-                
-                # 2. Check low-latency memory caching tier first to protect throughput
                 cached_verdict = cache.get(cache_key)
                 
                 if cached_verdict:
                     ai_verdict = cached_verdict
-                    st.caption("⚡ *Performance Metric: Low-Latency Memory Cache Hit! Bypassing extra cloud token usage.*")
+                    st.caption("⚡ *Performance Metric: Low-Latency Memory Cache Hit!*")
                     proc.log_security_event("CACHE_PERIMETER_HIT", "SUCCESS", {"key": cache_key})
                 else:
-                    # Cache Miss: Execute processing and vector metrics mapping
                     matches = proc.find_top_matches(cleaned_input, top_n=3)
                     ai_verdict = ai_helper.verify_duplicate_status(cleaned_input, matches)
-                    
-                    # Update memory caching structures
                     cache.set(cache_key, ai_verdict)
                     proc.log_security_event("CACHE_PERIMETER_MISS", "PROCESSED", {"key": cache_key})
 
-                # 3. Read verdict fields returned from structured JSON block
                 is_dup = False
                 for key in ["is_duplicate", "isDuplicate", "IS_DUPLICATE"]:
                     if key in ai_verdict:
@@ -208,7 +194,6 @@ else:
                     st.markdown(f"**Recommended Step:** `Assign to specialized department queue.`")
                     st.markdown(f"**AI Comparison Logic:** *{reasoning}*")
                     
-                    # Dynamic Learning Loop: Write unique entry back into relational tables instantly
                     new_id = f"TS-DYN-{int(datetime.now().timestamp())}"
                     try:
                         conn = sqlite3.connect(proc.db_path)
@@ -223,7 +208,6 @@ else:
                     except Exception:
                         pass
 
-                # 4. Generate data chart spectrum using Plotly horizontal visualization grid
                 fresh_matches = proc.find_top_matches(cleaned_input, top_n=3)
                 if fresh_matches:
                     st.markdown("---")
@@ -242,7 +226,6 @@ else:
                     st.plotly_chart(fig, use_container_width=True)
 
             except Exception as system_fault:
-                # Hide Internal Errors: Suppress raw trace values from breaking the viewport layout [backend_Securities: Hide Internal Errors]
                 st.error("⚠️ An internal infrastructure exception occurred while triaging this log record. Stack trace details have been shielded.")
                 proc.log_security_event("SYSTEM_CORE_ERROR", "FAILURE", {"details": str(system_fault)})
 
@@ -251,11 +234,26 @@ else:
         else:
             st.caption("Operational cockpit status: Idle. Trigger an inspection preset above to launch.")
 
-    # Bottom Panel Dashboard View: Security Auditing logs track who did what and when [backend_Securities: Audit Trails]
+    # ==================================================================================================
+    # UPGRADED BOTTOM PANEL: TWIN ADMIN MONITOR COCKPITS [backend_Securities: Audit Trails]
+    # ==================================================================================================
     st.markdown("---")
-    st.subheader("📋 Operational Security Audit Stream (Real-Time SQLite Log Matrix)")
-    audit_logs_df = proc.fetch_audit_logs()
-    if not audit_logs_df.empty:
-        st.dataframe(audit_logs_df, use_container_width=True, hide_index=True)
-    else:
-        st.caption("No auditable transaction records currently found in session storage logs.")
+    st.subheader("📋 Core Infrastructure Admin Auditing Cockpit")
+    
+    panel_col1, panel_col2 = st.columns(2)
+    
+    with panel_col1:
+        st.markdown("**Operational Security Event Audit Stream (SQLite)**")
+        audit_logs_df = proc.fetch_audit_logs()
+        if not audit_logs_df.empty:
+            st.dataframe(audit_logs_df, use_container_width=True, hide_index=True)
+        else:
+            st.caption("No auditable transactions recorded in active session limits.")
+            
+    with panel_col2:
+        st.markdown("**Registered Operators Directory Index (Identity & Access)**")
+        users_df = proc.fetch_registered_users()
+        if not users_df.empty:
+            st.dataframe(users_df, use_container_width=True, hide_index=True)
+        else:
+            st.caption("No corporate accounts initialized within storage clusters.")

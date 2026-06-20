@@ -53,11 +53,7 @@ class TicketProcessor:
         conn.close()
 
     def seed_historical_baseline(self):
-        """
-        Seeds standard company evaluation baseline entries.
-        Fixes the AttributeError in app.py by providing the required initialization signature.
-        """
-        # If the fallback baseline csv doesn't exist on disk, mock it out immediately
+        """Seeds standard company evaluation baseline entries."""
         if not os.path.exists(self.csv_path):
             os.makedirs(os.path.dirname(self.csv_path), exist_ok=True)
             mock_records = {
@@ -86,10 +82,8 @@ class TicketProcessor:
         if not text_payload:
             return ""
         
-        # XSS Prevention via escaping
         sanitized = html.escape(text_payload)
         
-        # Sensitive Data Masking: Redact credentials, tokens, and keys
         sanitized = re.sub(r'(?i)(password|passwd|pwd)\s*[:=]\s*[^\s,\'"]+', r'\1=********', sanitized)
         sanitized = re.sub(r'(?i)(token|bearer|api_key|secret)\s*[:=]\s*[^\s,\'"]+', r'\1=********', sanitized)
         sanitized = re.sub(r'AIzaSy[A-Za-z0-9_-]{35}', 'AIzaSy=********', sanitized)
@@ -112,6 +106,16 @@ class TicketProcessor:
         """Exposes relational audit data to your cockpit viewing matrix."""
         conn = sqlite3.connect(self.db_path)
         df = pd.read_sql_query("SELECT * FROM security_audit_logs ORDER BY timestamp DESC LIMIT 5", conn)
+        conn.close()
+        return df
+
+    def fetch_registered_users(self):
+        """
+        Fetches the directory list of registered accounts for admin audit views.
+        Excludes the password_hash entirely for safety [backend_Securities: Sensitive Data Masking].
+        """
+        conn = sqlite3.connect(self.db_path)
+        df = pd.read_sql_query("SELECT username, account_created FROM portal_users ORDER BY account_created DESC", conn)
         conn.close()
         return df
 
