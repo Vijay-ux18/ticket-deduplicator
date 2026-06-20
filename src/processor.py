@@ -110,11 +110,9 @@ class TicketProcessor:
         return df
 
     def fetch_registered_users(self):
-        """
-        Fetches the directory list of registered accounts for admin audit views.
-        Excludes the password_hash entirely for safety [backend_Securities: Sensitive Data Masking].
-        """
+        """Extracts registered account credentials directory for owner review [backend_Securities: Audit Trails]."""
         conn = sqlite3.connect(self.db_path)
+        # Pull usernames and creation timestamps, excluding password hashes for safety
         df = pd.read_sql_query("SELECT username, account_created FROM portal_users ORDER BY account_created DESC", conn)
         conn.close()
         return df
