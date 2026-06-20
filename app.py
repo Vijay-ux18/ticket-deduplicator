@@ -258,7 +258,7 @@ else:
     st.markdown("---")
     
     # Define your master owner username here
-    OWNER_ADMIN_USERNAME = "admin"
+    OWNER_ADMIN_USERNAME = "Vijay"
     
     # Check if the active user is the designated owner [backend_Securities: Authorization]
     if st.session_state.authenticated_user == OWNER_ADMIN_USERNAME:
