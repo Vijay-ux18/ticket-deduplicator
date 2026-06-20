@@ -280,9 +280,8 @@ else:
             st.warning("Please specify a non-empty string payload.")
         else:
             st.caption("Operational cockpit status: Idle. Trigger an inspection preset above to launch.")
-
-    # ==================================================================================================
-    # BOTTOM TIERS: DYNAMIC AUDITING PANELS & ROLE-BASED VISIBILITY
+# ==================================================================================================
+    # BOTTOM TIERS: DYNAMIC AUDITING PANELS & ROLE-BASED VISIBILITY [backend_Securities: Privacy Gate]
     # ==================================================================================================
     st.markdown("---")
     OWNER_ADMIN_USERNAME = "admin"
@@ -292,9 +291,10 @@ else:
         admin_col1, admin_col2 = st.columns(2)
         
         with admin_col1:
-            st.markdown("📋 **Operational Security Audit Stream (SQLite System View)**")
+            st.markdown("📋 **Operational Security Audit Stream (Full Owner View)**")
             audit_logs_df = proc.fetch_audit_logs()
             if not audit_logs_df.empty:
+                # The owner can see EVERYTHING, including full metadata summaries
                 st.dataframe(audit_logs_df, use_container_width=True, hide_index=True)
             else:
                 st.caption("No auditable transaction records currently logged.")
@@ -311,9 +311,12 @@ else:
                 st.caption(f"User directory sync lag: {str(e)}")
                 
     else:
+        # Standard User View: Securely hide other users' identities from leaking [backend_Securities: Masking]
         st.markdown("### 📋 Operational Security Audit Stream")
         audit_logs_df = proc.fetch_audit_logs()
         if not audit_logs_df.empty:
-            st.dataframe(audit_logs_df, use_container_width=True, hide_index=True)
+            # Drop the sensitive metadata summary column completely so regular users can't spy on other account actions
+            filtered_audit_df = audit_logs_df.drop(columns=['metadata_summary'], errors='ignore')
+            st.dataframe(filtered_audit_df, use_container_width=True, hide_index=True)
         else:
             st.caption("No auditable transaction records currently found.")
