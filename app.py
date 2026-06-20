@@ -284,7 +284,7 @@ else:
     # BOTTOM TIERS: DYNAMIC AUDITING PANELS & ROLE-BASED VISIBILITY [backend_Securities: Privacy Gate]
     # ==================================================================================================
     st.markdown("---")
-    OWNER_ADMIN_USERNAME = "admin"
+    OWNER_ADMIN_USERNAME = "Vijay"
     
     if st.session_state.authenticated_user == OWNER_ADMIN_USERNAME:
         st.markdown("<h3 style='color: #f59e0b;'>🔑 Secure Owner Admin Cockpit</h3>", unsafe_allow_html=True)
