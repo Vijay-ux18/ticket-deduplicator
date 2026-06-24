@@ -6,3 +6,4 @@ __pycache__/
 outputs/triage_report_*
 .streamlit/
 EOF
+venv/
